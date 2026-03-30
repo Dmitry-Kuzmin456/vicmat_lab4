@@ -39,7 +39,6 @@ def main():
         results.append((name, formula, rms, s_val, pearson))
         plt.plot(x_plot, func(x_plot), label=f"{name}")
 
-    # Печать таблицы
     print(f"{'Модель':<20} | {'Формула':<30} | {'RMS':<8} | {'S'}")
     print("-" * 75)
     best_model = min(results, key=lambda t: t[2])
