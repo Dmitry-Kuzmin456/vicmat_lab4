@@ -39,13 +39,13 @@ def main():
         results.append((name, formula, rms, s_val, pearson))
         plt.plot(x_plot, func(x_plot), label=f"{name}")
 
-    print(f"{'Модель':<20} | {'Формула':<30} | {'RMS':<8} | {'S'}")
-    print("-" * 75)
+    print(f"{'Модель':<20} | {'Формула':<50} | {'RMS':<8} | {'S'}")
+    print("-" * 100)
     best_model = min(results, key=lambda t: t[2])
 
     for r in results:
         p_str = f" (r={r[4]:.3f})" if r[4] is not None else ""
-        print(f"{r[0]:<20} | {r[1]:<30} | {r[2]:.4f} | {r[3]:.4f}{p_str}")
+        print(f"{r[0]:<20} | {r[1]:<50} | {r[2]:.4f} | {r[3]:.4f}{p_str}")
 
     print(f"\nНаилучшая аппроксимация: {best_model[0]} ({best_model[1]})")
 
