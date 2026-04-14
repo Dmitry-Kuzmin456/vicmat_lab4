@@ -2,14 +2,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from models import ApproximationModels, get_rms
 
+# Словарь вариантов заданий
+VARIANTS = {
+    "1": {"name": "3x / (x^4 + 3)", "func": lambda x: (3 * x) / (x ** 4 + 3), "range": (-2, 0)},
+    "2": {"name": "sin(x) + 0.5", "func": lambda x: np.sin(x) + 0.5, "range": (0, 3)},
+    "3": {"name": "x^2 - 4x", "func": lambda x: x ** 2 - 4 * x, "range": (0, 4)}
+}
+
 
 def main():
-    try:
-        data = np.loadtxt('data.txt')
-        x, y = data[:, 0], data[:, 1]
-    except:
-        print("Ошибка загрузки data.txt")
-        return
+    print("--- Аппроксимация функций МНК ---")
+    print("1. Загрузить данные из data.txt")
+    print("2. Выбрать функцию из вариантов")
+
+    choice = input("Ваш выбор: ")
+
+    if choice == "2":
+        print("\nДоступные варианты:")
+        for k, v in VARIANTS.items():
+            print(f"{k}. {v['name']} на интервале {v['range']}")
+        v_idx = input("Номер варианта: ")
+        var = VARIANTS.get(v_idx, VARIANTS["1"])
+
+        x = np.linspace(var['range'][0], var['range'][1], 11)
+        y = var['func'](x)
+        print(f"Сгенерированы данные для функции {var['name']}")
+    else:
+        try:
+            data = np.loadtxt('data.txt')
+            x, y = data[:, 0], data[:, 1]
+        except Exception as e:
+            print(f"Ошибка загрузки файла: {e}")
+            return
 
     models = [
         ("Линейная", ApproximationModels.linear),
@@ -21,13 +45,20 @@ def main():
     ]
 
     results = []
-    plt.figure(figsize=(10, 6))
-    plt.scatter(x, y, color='red', label='Исходные данные')
+    plt.figure(figsize=(12, 7))
+    plt.scatter(x, y, color='black', zorder=5, label='Исходные данные')
 
-    x_plot = np.linspace(min(x) - 0.2, max(x) + 0.2, 200)
+    # Для плавных графиков
+    x_plot = np.linspace(min(x) - 0.2, max(x) + 0.2, 300)
+
+    print(f"\n{'Модель':<20} | {'RMS (СКО)':<10} | {'S (Мера)':<10} | {'Формула'}")
+    print("-" * 80)
 
     for name, factory in models:
         res = factory(x, y)
+        if res is None: continue
+
+        # Распаковка (у линейной есть Пирсон, у остальных нет)
         pearson = None
         if len(res) == 3:
             func, formula, pearson = res
@@ -36,22 +67,22 @@ def main():
 
         y_pred = func(x)
         rms, s_val = get_rms(y, y_pred)
-        results.append((name, formula, rms, s_val, pearson))
-        plt.plot(x_plot, func(x_plot), label=f"{name}")
+        results.append({"name": name, "formula": formula, "rms": rms, "s": s_val})
 
-    print(f"{'Модель':<20} | {'Формула':<50} | {'RMS':<8} | {'S'}")
-    print("-" * 100)
-    best_model = min(results, key=lambda t: t[2])
+        p_str = f" [r={pearson:.3f}]" if pearson is not None else ""
+        print(f"{name:<20} | {rms:<10.4f} | {s_val:<10.4f} | {formula}{p_str}")
 
-    for r in results:
-        p_str = f" (r={r[4]:.3f})" if r[4] is not None else ""
-        print(f"{r[0]:<20} | {r[1]:<50} | {r[2]:.4f} | {r[3]:.4f}{p_str}")
+        plt.plot(x_plot, func(x_plot), label=f"{name} (RMS:{rms:.3f})", alpha=0.8)
 
-    print(f"\nНаилучшая аппроксимация: {best_model[0]} ({best_model[1]})")
+    best_model = min(results, key=lambda t: t['rms'])
+    print("-" * 80)
+    print(f"НАИЛУЧШАЯ МОДЕЛЬ: {best_model['name']}")
+    print(f"ФОРМУЛА: {best_model['formula']}")
+    print(f"МИНИМАЛЬНОЕ СКО: {best_model['rms']:.4f}")
 
+    plt.title("Аппроксимация функций методом наименьших квадратов")
     plt.legend()
-    plt.grid(True)
-    plt.title("Аппроксимация функций МНК")
+    plt.grid(True, linestyle='--', alpha=0.7)
     plt.show()
 
 
