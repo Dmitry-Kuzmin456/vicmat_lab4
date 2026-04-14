@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from models import ApproximationModels, get_rms
 
-# Словарь вариантов заданий
 VARIANTS = {
     "1": {"name": "3x / (x^4 + 3)", "func": lambda x: (3 * x) / (x ** 4 + 3), "range": (-2, 0)},
     "2": {"name": "sin(x) + 0.5", "func": lambda x: np.sin(x) + 0.5, "range": (0, 3)},
@@ -48,7 +47,6 @@ def main():
     plt.figure(figsize=(12, 7))
     plt.scatter(x, y, color='black', zorder=5, label='Исходные данные')
 
-    # Для плавных графиков
     x_plot = np.linspace(min(x) - 0.2, max(x) + 0.2, 300)
 
     print(f"\n{'Модель':<20} | {'RMS (СКО)':<10} | {'S (Мера)':<10} | {'Формула'}")
@@ -58,7 +56,6 @@ def main():
         res = factory(x, y)
         if res is None: continue
 
-        # Распаковка (у линейной есть Пирсон, у остальных нет)
         pearson = None
         if len(res) == 3:
             func, formula, pearson = res

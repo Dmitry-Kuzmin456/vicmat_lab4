@@ -26,7 +26,6 @@ class ApproximationModels:
         a, b = res
         func = lambda t: a * t + b
 
-        # Коэффициент Пирсона
         mx, my = np.mean(x), np.mean(y)
         num = np.sum((x - mx) * (y - my))
         den = np.sqrt(np.sum((x - mx) ** 2) * np.sum((y - my) ** 2))
@@ -48,10 +47,9 @@ class ApproximationModels:
 
     @staticmethod
     def exponential(x, y):
-        # Авто-определение знака для логарифмирования
         sign = np.sign(np.mean(y))
         y_mod = y * sign
-        y_mod[y_mod <= 0] = 1e-9  # Защита от log(0)
+        y_mod[y_mod <= 0] = 1e-9
 
         coeffs = np.polyfit(x, np.log(y_mod), 1)
         a, b = np.exp(coeffs[1]), coeffs[0]
