@@ -40,11 +40,16 @@ class ApproximationModels:
 
     @staticmethod
     def exponential(x, y):
-        y_pos = -y
-        y_pos[y_pos <= 0] = 1e-9
-        coeffs = np.polyfit(x, np.log(y_pos), 1)
+        # Определяем знак данных
+        sign = np.sign(np.mean(y))
+        y_mod = y * sign
+        y_mod[y_mod <= 0] = 1e-9
+
+        coeffs = np.polyfit(x, np.log(y_mod), 1)
         a, b = np.exp(coeffs[1]), coeffs[0]
-        return lambda t: -a * np.exp(b * t), f"{-a:.3f} * exp({b:.3f}x)"
+
+        # Возвращаем функцию с учетом исходного знака
+        return lambda t: sign * a * np.exp(b * t), f"{sign * a:.3f} * exp({b:.3f}x)"
 
     @staticmethod
     def log(x, y):
@@ -55,10 +60,14 @@ class ApproximationModels:
 
     @staticmethod
     def power(x, y):
+        sign_y = np.sign(np.mean(y))
         x_mod = np.abs(x)
-        y_mod = np.abs(y)
+        y_mod = y * sign_y
+
         x_mod[x_mod <= 0] = 1e-9
         y_mod[y_mod <= 0] = 1e-9
+
         coeffs = np.polyfit(np.log(x_mod), np.log(y_mod), 1)
         a, b = np.exp(coeffs[1]), coeffs[0]
-        return lambda t: -a * (np.abs(t) ** b), f"{-a:.3f} * |x|^{b:.3f}"
+
+        return lambda t: sign_y * a * (np.abs(t) ** b), f"{sign_y * a:.3f} * |x|^{b:.3f}"
